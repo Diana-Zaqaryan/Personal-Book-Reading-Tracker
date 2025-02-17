@@ -60,7 +60,14 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
       bookList: userData?.bookList ? [...userData?.bookList, book] : [book],
     });
     refetch();
-    isBookAdded(true, "New book is added !! 😊📚");
+    if (userData.notificationEnabled) {
+      await updateDoc(userRef, {
+        notifications: userData?.notifications
+          ? userData?.notifications + 1
+          : 1,
+      });
+      isBookAdded(true, "New book is added !! 😊📚");
+    }
     navigate(EXPERIMENT);
     handleClose();
   };

@@ -104,7 +104,6 @@ function Profile({ currentUser }: { currentUser: User }) {
     const updatedData = {
       name: form.store.state.values.name,
       lastName: form.store.state.values.lastName,
-      email: form.store.state.values.email,
       photo: form.store.state.values.photo,
       uid: form.store.state.values.uid,
       bio: form.store.state.values.bio,
@@ -239,44 +238,6 @@ function Profile({ currentUser }: { currentUser: User }) {
             }}
           />
 
-          <form.Field
-            name="email"
-            validators={{
-              onChange: (value) => {
-                try {
-                  yup
-                    .string()
-                    .required("Обязательное поле")
-                    .email("dcsadscdsdcs")
-                    .validateSync(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof Error) {
-                    return error.message;
-                  }
-                }
-              },
-            }}
-            children={(field) => {
-              return (
-                <TextField
-                  id="email-input"
-                  label="Email"
-                  fullWidth
-                  variant="standard"
-                  disabled={!isEditing}
-                  type="text"
-                  style={{ margin: "25px auto" }}
-                  autoComplete="current-lastName"
-                  value={field.state.value}
-                  onChange={handleFieldChange("email")}
-                  onBlur={field.handleBlur}
-                  error={!!field.state.meta.errors.length}
-                  helperText={field.state.meta.errors.join(", ")}
-                />
-              );
-            }}
-          />
           <form.Field
             name="bio"
             validators={{

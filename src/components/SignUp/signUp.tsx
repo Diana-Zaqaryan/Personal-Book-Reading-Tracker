@@ -8,7 +8,7 @@ import styles from "./signUp.module.css";
 
 import Box from "@mui/material/Box";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { signInWithGoogle, signupWithEmail } from "../../service/http.ts";
 import { db } from "../../../firebase.ts";
 import { useGenres } from "../../hooks/useGenres.ts";
@@ -69,12 +69,28 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
     try {
       const user = await signInWithGoogle();
       const userRef = doc(db, "user", user.uid as string);
-      await setDoc(userRef, {
-        name: "Unknown",
-        lastName: "User",
-        email: user.email,
-        uid: user.uid,
-      });
+
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        await setDoc(
+          userRef,
+          {
+            name: userDoc.data().name || "Unknown",
+            lastName: userDoc.data().lastName || "User",
+            email: user.email,
+            uid: user.uid,
+          },
+          { merge: true },
+        );
+      } else {
+        await setDoc(userRef, {
+          name: "Unknown",
+          lastName: "User",
+          email: user.email,
+          uid: user.uid,
+        });
+      }
 
       handleSetUp(true);
       alert("Google login successful!");

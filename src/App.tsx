@@ -32,20 +32,12 @@ function App() {
   const [isAuth, setIsAuth] = useState(false);
   const { data: userData, isLoading: userIsLoading, refetch } = useUser();
   const { data, isLoading } = useBook();
-  const [notifications, setNotifications] = useState<number>(0);
 
   const muiTheme = userData?.theme
     ? userData?.theme === "dark"
       ? darkTheme
       : lightTheme
     : lightTheme;
-
-  useEffect(() => {
-    const savedNotifications = localStorage.getItem("notifications");
-    if (savedNotifications) {
-      setNotifications(Number(savedNotifications));
-    }
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -55,11 +47,6 @@ function App() {
         onMessage(messaging, (payload) => {
           console.log(payload);
           toast(payload.notification?.body as string);
-          setNotifications((prev) => {
-            const newCount = prev + 1;
-            localStorage.setItem("notifications", newCount.toString());
-            return newCount;
-          });
         });
 
         refetch();
@@ -77,11 +64,6 @@ function App() {
 
   function isNewBookAdded(isAdded: boolean, message: string) {
     if (isAdded) {
-      setNotifications((prev: number) => {
-        const newCount = prev + 1;
-        localStorage.setItem("notifications", newCount.toString());
-        return newCount;
-      });
       toast(message);
     }
   }
@@ -92,7 +74,7 @@ function App() {
       <ButtonAppBar
         handleLogOut={setIsAuth}
         isAuth={isAuth}
-        notifications={notifications}
+        notifications={userData?.notifications}
       />
       <Routes>
         <Route path="/" element={<Navigate to={LOGIN_ROUTE} replace />} />

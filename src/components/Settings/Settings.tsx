@@ -41,22 +41,29 @@ const Settings = ({
   const { theme, toggleTheme } = useTheme();
   const { data } = useUser();
   console.log(data);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const user = auth.currentUser;
+  const [notificationEnabled, setNotificationEnabled] = useState<boolean>(true);
   const [newPassword, setNewPassword] = useState(currentUser.password);
   const [currentPass, setCurrentPass] = useState(currentUser.password);
+  const [currentMail, setCurrentMail] = useState(user?.email);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
   const form = useForm({
     defaultValues: {
-      email: currentUser.email || "",
+      email: currentMail || "",
       newPassword: "",
       currentPassword: currentPass,
       theme: currentUser?.theme ? currentUser.theme : "",
+      notificationEnabled:
+        currentUser.notificationEnabled !== undefined
+          ? currentUser.notificationEnabled
+          : true,
     },
     onSubmit: async ({ value }) => {
-      const user = auth.currentUser;
+      console.log("Form submitted with values:", value);
 
       if (!user || !user.email) {
         alert("No user is signed in.");
@@ -70,8 +77,9 @@ const Settings = ({
         );
         await reauthenticateWithCredential(user, credential);
 
-        if (value.email !== currentUser.email) {
+        if (value.email !== user.email) {
           await updateEmail(user, value.email);
+          setCurrentMail(value.email);
           alert("Email updated successfully!");
         }
 
@@ -135,11 +143,24 @@ const Settings = ({
     }
   };
 
+  const handleNotificationToggle = async (newStatus: boolean) => {
+    if (!user) return;
+    console.log(newStatus);
+    setNotificationEnabled(newStatus);
+    const userRef = doc(db, "user", user.uid);
+    await updateDoc(userRef, {
+      notificationEnabled: newStatus,
+    });
+    refetch();
+  };
+
   return (
     <form
-      onSubmit={async (e: FormEvent) => {
+      onSubmit={(e: FormEvent) => {
         e.preventDefault();
+        console.log("Form submission triggered");
         form.handleSubmit();
+        console.log("After form.handleSubmit");
       }}
       style={{ width: "70%", margin: "0 auto" }}
     >
@@ -184,7 +205,7 @@ const Settings = ({
 
           <form.Field
             // @ts-ignore
-            name="notifications"
+            name="notificationsEnabled"
             // @ts-ignore
             children={(field) => (
               <Box
@@ -201,10 +222,11 @@ const Settings = ({
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={notificationsEnabled}
-                      onChange={(e) =>
-                        setNotificationsEnabled(e.target.checked)
-                      }
+                      checked={currentUser?.notificationEnabled}
+                      onChange={(e) => {
+                        handleNotificationToggle(e.target.checked);
+                        field.handleChange(e.target.value);
+                      }}
                       color="primary"
                     />
                   }
@@ -229,17 +251,23 @@ const Settings = ({
                 .required("Email is required"),
             }}
             children={(field) => (
-              <TextField
-                fullWidth
-                label="Email"
-                variant="outlined"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={!!field.state.meta.errors.length}
-                helperText={field.state.meta.errors.join(", ")}
-                sx={{ mb: 2 }}
-              />
+              <FormControl>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  variant="outlined"
+                  id="email"
+                  value={field.state.value}
+                  onChange={(e) => {
+                    field.handleChange(e.target.value);
+                    setCurrentMail(e.target.value);
+                  }}
+                  onBlur={field.handleBlur}
+                  error={!!field.state.meta.errors.length}
+                  helperText={field.state.meta.errors.join(", ")}
+                  sx={{ mb: 2 }}
+                />
+              </FormControl>
             )}
           />
 
@@ -258,7 +286,7 @@ const Settings = ({
                 <OutlinedInput
                   disabled={true}
                   id="current-password"
-                  type={showPassword ? "text" : "password"}
+                  type={"text"}
                   value={currentPass}
                   onChange={(e) => {
                     field.handleChange(e.target.value);
@@ -295,6 +323,7 @@ const Settings = ({
                 <InputLabel htmlFor="new-password">New Password</InputLabel>
                 <OutlinedInput
                   id="new-password"
+                  placeholder={currentPass}
                   type={showPassword ? "text" : "password"}
                   value={field.state.value}
                   onChange={(e) => {
