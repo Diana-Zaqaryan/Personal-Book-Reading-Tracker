@@ -103,6 +103,7 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
             display: "flex",
             flexDirection: "column",
             width: "50%",
+            margin: "2em auto",
           }}
         >
           <form

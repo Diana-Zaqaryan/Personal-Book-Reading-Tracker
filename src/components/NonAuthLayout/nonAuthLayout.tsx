@@ -17,7 +17,6 @@ const NonAuthLayout = ({ isAuth }: NonAuthRouteProps) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
       }}

@@ -41,6 +41,13 @@ function App() {
     : lightTheme;
 
   useEffect(() => {
+    const savedNotifications = localStorage.getItem("notifications");
+    if (savedNotifications) {
+      setNotifications(Number(savedNotifications));
+    }
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuth(true);
@@ -48,7 +55,11 @@ function App() {
         onMessage(messaging, (payload) => {
           console.log(payload);
           toast(payload.notification?.body as string);
-          setNotifications((prev) => prev + 1);
+          setNotifications((prev) => {
+            const newCount = prev + 1;
+            localStorage.setItem("notifications", newCount.toString());
+            return newCount;
+          });
         });
 
         refetch();
@@ -62,6 +73,17 @@ function App() {
 
   if (userIsLoading || isLoading) {
     return <div>Loading...</div>;
+  }
+
+  function isNewBookAdded(isAdded: boolean, message: string) {
+    if (isAdded) {
+      setNotifications((prev: number) => {
+        const newCount = prev + 1;
+        localStorage.setItem("notifications", newCount.toString());
+        return newCount;
+      });
+      toast(message);
+    }
   }
 
   return (
@@ -86,7 +108,12 @@ function App() {
             <Route
               path={BOOKS}
               element={
-                <BooksList data={data} onAddBook={null} isAuth={isAuth} />
+                <BooksList
+                  isBookAdded={isNewBookAdded}
+                  data={data}
+                  onAddBook={null}
+                  isAuth={isAuth}
+                />
               }
             />
             <Route
@@ -99,7 +126,10 @@ function App() {
             />
             <Route path={TOREADLIST} element={<ToReadList />} />
             <Route path="*" element={<Navigate to={BOOKS} />} />
-            <Route path="/experiment" element={<Experiment />} />
+            <Route
+              path="/experiment"
+              element={<Experiment isNewBookAdded={isNewBookAdded} />}
+            />
           </Route>
         )}
       </Routes>

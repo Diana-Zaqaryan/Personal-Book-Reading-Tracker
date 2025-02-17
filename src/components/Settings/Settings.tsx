@@ -29,6 +29,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm } from "@tanstack/react-form";
 import { yupValidator } from "@tanstack/yup-form-adapter";
 import * as yup from "yup";
+import { useUser } from "../../hooks/useUser.ts";
 
 const Settings = ({
   currentUser,
@@ -38,6 +39,8 @@ const Settings = ({
   refetch: () => void;
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { data } = useUser();
+  console.log(data);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [newPassword, setNewPassword] = useState(currentUser.password);
   const [currentPass, setCurrentPass] = useState(currentUser.password);
@@ -50,7 +53,7 @@ const Settings = ({
       email: currentUser.email || "",
       newPassword: "",
       currentPassword: currentPass,
-      theme: currentUser.theme ? currentUser.theme : "",
+      theme: currentUser?.theme ? currentUser.theme : "",
     },
     onSubmit: async ({ value }) => {
       const user = auth.currentUser;
@@ -79,8 +82,6 @@ const Settings = ({
 
         const userRef = doc(db, "user", user.uid);
         await updateDoc(userRef, {
-          notificationsEnabled,
-          theme: currentUser.theme,
           password: newPassword,
         });
         refetch();
@@ -183,9 +184,9 @@ const Settings = ({
 
           <form.Field
             // @ts-ignore
-            name="notification"
+            name="notifications"
             // @ts-ignore
-            children={(_field) => (
+            children={(field) => (
               <Box
                 sx={{
                   display: "flex",

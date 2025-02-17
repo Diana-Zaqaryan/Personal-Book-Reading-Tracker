@@ -1,4 +1,4 @@
-import { useState, useEffect, use, useRef } from "react";
+import { useState, useRef } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import {
   Box,
@@ -15,21 +15,26 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useUser } from "../../hooks/useUser.ts";
-import { updateUserBookList, updateUserData } from "../../service/http.ts";
+import { updateUserData } from "../../service/http.ts";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Book, DropZoneType, Status } from "../../type/type.ts";
 import { useStatuses } from "../../hooks/useStatuses.ts";
 import BookIcon from "@mui/icons-material/Book";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import useMutationUser from "../../hooks/useUserUpdate.ts";
-import booksList from "../BooksList/booksList.tsx";
+
 import BooksList from "../BooksList/booksList.tsx";
 import { useBook } from "../../hooks/useBook.tsx";
 
 const ITEM_TYPE = "BOOK";
 
-const BookCard = ({ book, moveBook, removeBook }) => {
+const BookCard = ({
+  book,
+  removeBook,
+}: {
+  book: Book;
+  removeBook: (bookId: string) => void;
+}) => {
   const [, drag] = useDrag(() => ({
     type: ITEM_TYPE,
     item: { id: book.id },
@@ -75,7 +80,7 @@ const BookCard = ({ book, moveBook, removeBook }) => {
 
   return (
     // @ts-ignore
-    <Box key={book.id} ref={drag} margin={"1em"}>
+    <Box key={book.id} ref={drag} margin={"1em auto"}>
       <Card
         sx={{
           display: "flex",
@@ -84,6 +89,7 @@ const BookCard = ({ book, moveBook, removeBook }) => {
           height: "20em",
           alignItems: "flex-start",
           justifyContent: "space-evenly",
+          margin: "0 auto",
         }}
       >
         <Box>
@@ -198,24 +204,20 @@ const DropZone = ({
         marginBottom: 2,
         minHeight: "300px",
         borderRadius: "20px",
+        width: "33%",
       }}
     >
       <Typography variant="h6" gutterBottom>
         {statusName}
       </Typography>
       {books.map((book) => (
-        <BookCard
-          key={book.id}
-          book={book}
-          moveBook={moveBook}
-          removeBook={removeBook}
-        />
+        <BookCard key={book.id} book={book} removeBook={removeBook} />
       ))}
     </Box>
   );
 };
 
-function Experiment() {
+function Experiment({ isNewBookAdded }) {
   const { data, isLoading, refetch } = useUser();
   const { data: BookData } = useBook();
 
@@ -298,7 +300,12 @@ function Experiment() {
         fullWidth
         maxWidth="md"
       >
-        <BooksList data={BookData} isAuth={true} onAddBook={handleAddBook} />
+        <BooksList
+          isBookAdded={isNewBookAdded}
+          data={BookData}
+          isAuth={true}
+          onAddBook={handleAddBook}
+        />
       </Dialog>
       <DndProvider backend={HTML5Backend}>
         <Box
@@ -337,4 +344,5 @@ function Experiment() {
   );
 }
 
+// @ts-ignore
 export default Experiment;

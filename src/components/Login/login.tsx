@@ -55,7 +55,7 @@ function Login({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
         justifyContent={"center"}
       >
         <Box
-          style={{ width: "400px" }}
+          style={{ width: "400px", margin: "5em auto" }}
           alignItems={"center"}
           justifyContent={"center"}
         >

@@ -21,10 +21,10 @@ import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { useNavigate } from "react-router-dom";
-import { EXPERIMENT, TOREADLIST } from "../../utils/consts.ts";
+import { EXPERIMENT } from "../../utils/consts.ts";
 
 // @ts-ignore
-function BooksList({ data, isAuth, onAddBook }) {
+function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
   // const { data, isLoading } = useBook();
   const [open, setOpen] = useState(false);
   const [selectBook, setSelectBook] = useState<Book>();
@@ -60,6 +60,7 @@ function BooksList({ data, isAuth, onAddBook }) {
       bookList: userData?.bookList ? [...userData?.bookList, book] : [book],
     });
     refetch();
+    isBookAdded(true, "New book is added !! 😊📚");
     navigate(EXPERIMENT);
     handleClose();
   };

@@ -10,6 +10,7 @@ export interface User {
   favoriteGenres?: any;
   theme?: string;
   bookList?: Book[] | [];
+  notifications?: boolean;
 }
 
 export interface Book {
