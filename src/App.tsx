@@ -6,10 +6,11 @@ import Login from "./components/Login/login.tsx";
 import SignUp from "./components/SignUp/signUp.tsx";
 import BooksList from "./components/BooksList/booksList.tsx";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase.ts";
+import { auth, generateToken, messaging } from "../firebase.ts";
 import { useUser } from "./hooks/useUser.ts";
 import NonAuthLayout from "./components/NonAuthLayout/nonAuthLayout.tsx";
 import Main from "./components/main/main.tsx";
+import { onMessage } from "firebase/messaging";
 import {
   BOOKS,
   LOGIN_ROUTE,
@@ -25,11 +26,13 @@ import Settings from "./components/Settings/Settings.tsx";
 import ToReadList from "./components/ToReadList/ToReadList.tsx";
 import Experiment from "./components/experiments/experiment.tsx";
 import { useBook } from "./hooks/useBook.tsx";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
   const { data: userData, isLoading: userIsLoading, refetch } = useUser();
   const { data, isLoading } = useBook();
+  const [notifications, setNotifications] = useState<number>(0);
 
   const muiTheme = userData?.theme
     ? userData?.theme === "dark"
@@ -41,6 +44,13 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuth(true);
+        generateToken();
+        onMessage(messaging, (payload) => {
+          console.log(payload);
+          toast(payload.notification?.body as string);
+          setNotifications((prev) => prev + 1);
+        });
+
         refetch();
       } else {
         setIsAuth(false);
@@ -56,7 +66,12 @@ function App() {
 
   return (
     <MuiThemeProvider theme={muiTheme}>
-      <ButtonAppBar handleLogOut={setIsAuth} isAuth={isAuth} />
+      <Toaster position={"top-right"} />
+      <ButtonAppBar
+        handleLogOut={setIsAuth}
+        isAuth={isAuth}
+        notifications={notifications}
+      />
       <Routes>
         <Route path="/" element={<Navigate to={LOGIN_ROUTE} replace />} />
         <Route element={<NonAuthLayout isAuth={isAuth} />}>

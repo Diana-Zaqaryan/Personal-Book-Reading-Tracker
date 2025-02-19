@@ -16,9 +16,11 @@ import icon2 from "../../assets/icon2.png";
 export default function ButtonAppBar({
   isAuth,
   handleLogOut,
+  notifications,
 }: {
   isAuth: boolean;
   handleLogOut: (value: boolean) => void;
+  notifications: number;
 }) {
   const navigate = useNavigate();
 
@@ -91,7 +93,7 @@ export default function ButtonAppBar({
             {isAuth ? (
               <>
                 <Box>
-                  <Badge badgeContent={17} color="error">
+                  <Badge badgeContent={notifications} color="error">
                     <NotificationsIcon />
                   </Badge>
                 </Box>
