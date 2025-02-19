@@ -1,0 +1,10 @@
+.box{
+    display: flex;
+    align-items: center;
+    margin: 20px auto;
+    justify-content: space-around;
+    &:hover {
+        background-color: #1976d2;
+        color: white;
+    }
+}

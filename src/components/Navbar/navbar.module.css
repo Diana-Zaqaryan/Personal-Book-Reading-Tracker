@@ -1,0 +1,10 @@
+.icon{
+    width: 80px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
