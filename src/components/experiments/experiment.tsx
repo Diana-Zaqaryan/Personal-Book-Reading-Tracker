@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import {
   Box,
@@ -214,20 +214,22 @@ const DropZone = ({
 
 function Experiment() {
   const { data, isLoading, refetch } = useUser();
-  const [books, setBooks] = useState<Book[]>([]);
+
+  const bookRef = useRef(data.bookList);
 
   const removeBook = (bookId: string) => {
-    const updatedBookList = data.bookList.filter(
+    const updatedBookList = bookRef.current.filter(
       (book: Book) => book.id !== bookId,
     );
     updateUserData(data.uid, { bookList: updatedBookList }).then(() => {});
     refetch();
+    bookRef.current = updatedBookList;
   };
 
   console.log("updates--->", data.bookList);
 
   const moveBook = (bookId: string, newStatus: number) => {
-    const updatedBookList = data.bookList.map((book: Book) => {
+    const updatedBookList = bookRef.current.map((book: Book) => {
       if (book.id === bookId) {
         return { ...book, status: newStatus };
       }
@@ -235,8 +237,11 @@ function Experiment() {
     });
 
     updateUserData(data.uid, { bookList: updatedBookList });
+    bookRef.current = updatedBookList;
     refetch();
   };
+
+  console.log(bookRef.current);
 
   if (isLoading) {
     return <div>Loading...</div>;
