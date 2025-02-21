@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { updateUserBookList, updateUserData } from "../service/http.ts";
+import { updateUserBookList } from "../service/http.ts";
 
 export default function useMutationUser() {
   const queryClient = useQueryClient();
@@ -25,6 +24,7 @@ export default function useMutationUser() {
 
   const updateMutation = useMutation({
     mutationKey: ["update user"],
+    // @ts-ignore
     mutationFn: (user) => updateUserBookList(user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });

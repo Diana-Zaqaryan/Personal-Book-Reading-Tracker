@@ -27,6 +27,7 @@ import ToReadList from "./components/ToReadList/ToReadList.tsx";
 import Experiment from "./components/experiments/experiment.tsx";
 import { useBook } from "./hooks/useBook.tsx";
 import toast, { Toaster } from "react-hot-toast";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
@@ -71,10 +72,25 @@ function App() {
   return (
     <MuiThemeProvider theme={muiTheme}>
       <Toaster position={"top-right"} />
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <ButtonAppBar
+        userData={userData}
         handleLogOut={setIsAuth}
         isAuth={isAuth}
         notifications={userData?.notifications}
+        refetch={refetch}
       />
       <Routes>
         <Route path="/" element={<Navigate to={LOGIN_ROUTE} replace />} />

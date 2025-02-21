@@ -217,7 +217,11 @@ const DropZone = ({
   );
 };
 
-function Experiment({ isNewBookAdded }) {
+function Experiment({
+  isNewBookAdded,
+}: {
+  isNewBookAdded: (value: boolean, message: string) => void;
+}) {
   const { data, isLoading, refetch } = useUser();
   const { data: BookData } = useBook();
 
@@ -233,8 +237,6 @@ function Experiment({ isNewBookAdded }) {
     bookRef.current = updatedBookList;
   };
 
-  console.log("updates--->", data.bookList);
-
   const moveBook = (bookId: string, newStatus: number) => {
     const updatedBookList = bookRef.current.map((book: Book) => {
       if (book.id === bookId) {
@@ -247,8 +249,6 @@ function Experiment({ isNewBookAdded }) {
     bookRef.current = updatedBookList;
     refetch();
   };
-
-  console.log(bookRef.current);
 
   if (isLoading) {
     return <div>Loading...</div>;

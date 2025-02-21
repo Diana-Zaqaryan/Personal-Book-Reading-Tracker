@@ -12,21 +12,41 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { logout } from "../../service/http.ts";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import icon2 from "../../assets/icon2.png";
+import { doc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../../../firebase.ts";
+import { User } from "../../type/type.ts";
 
 export default function ButtonAppBar({
   isAuth,
   handleLogOut,
   notifications,
+  userData,
+  refetch,
 }: {
   isAuth: boolean;
   handleLogOut: (value: boolean) => void;
-  notifications: number;
+  notifications: string[];
+  userData: User;
+  refetch: () => void;
 }) {
   const navigate = useNavigate();
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const [anchorElNotifications, setAnchorElNotifications] =
+    useState<null | HTMLElement>(null);
+  const notificationsOpen = Boolean(anchorElNotifications);
 
+  const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNotifications(event.currentTarget);
+  };
+  const handleNotificationsClose = async () => {
+    setAnchorElNotifications(null);
+    const userRef = doc(db, "user", auth.currentUser?.uid || "");
+    await updateDoc(userRef, { notificationsCount: 0 });
+    userData.notificationsCount = 0;
+    refetch();
+  };
+  refetch();
   // @ts-ignore
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -93,9 +113,44 @@ export default function ButtonAppBar({
             {isAuth ? (
               <>
                 <Box>
-                  <Badge badgeContent={notifications} color="error">
+                  <Badge
+                    badgeContent={
+                      userData?.notificationsCount &&
+                      userData?.notificationsCount > 0
+                        ? userData?.notificationsCount
+                        : null
+                    }
+                    onClick={handleNotificationsClick}
+                    color="error"
+                    sx={{ cursor: "pointer" }}
+                  >
                     <NotificationsIcon />
                   </Badge>
+                  <Menu
+                    anchorEl={anchorElNotifications}
+                    open={notificationsOpen}
+                    onClose={handleNotificationsClose}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "center",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "center",
+                    }}
+                  >
+                    {notifications && notifications.length ? (
+                      notifications.map((not, index) => (
+                        <MenuItem key={index}>
+                          <Typography>{not}</Typography>
+                        </MenuItem>
+                      ))
+                    ) : (
+                      <MenuItem>
+                        <Typography>No new notifications</Typography>
+                      </MenuItem>
+                    )}
+                  </Menu>
                 </Box>
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>

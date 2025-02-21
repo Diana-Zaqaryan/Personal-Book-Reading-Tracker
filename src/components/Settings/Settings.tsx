@@ -29,7 +29,6 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm } from "@tanstack/react-form";
 import { yupValidator } from "@tanstack/yup-form-adapter";
 import * as yup from "yup";
-import { useUser } from "../../hooks/useUser.ts";
 
 const Settings = ({
   currentUser,
@@ -39,11 +38,7 @@ const Settings = ({
   refetch: () => void;
 }) => {
   const { theme, toggleTheme } = useTheme();
-  const { data } = useUser();
-  console.log(data);
-
   const user = auth.currentUser;
-  const [notificationEnabled, setNotificationEnabled] = useState<boolean>(true);
   const [newPassword, setNewPassword] = useState(currentUser.password);
   const [currentPass, setCurrentPass] = useState(currentUser.password);
   const [currentMail, setCurrentMail] = useState(user?.email);
@@ -137,7 +132,6 @@ const Settings = ({
       await updateDoc(userRef, {
         theme: theme === "light" ? "dark" : "light",
       });
-      console.log(theme);
       refetch();
       localStorage.setItem("theme", JSON.stringify([theme, user.uid]));
     }
@@ -145,8 +139,6 @@ const Settings = ({
 
   const handleNotificationToggle = async (newStatus: boolean) => {
     if (!user) return;
-    console.log(newStatus);
-    setNotificationEnabled(newStatus);
     const userRef = doc(db, "user", user.uid);
     await updateDoc(userRef, {
       notificationEnabled: newStatus,

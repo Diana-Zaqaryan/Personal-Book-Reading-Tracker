@@ -13,6 +13,7 @@ import { signInWithGoogle, signupWithEmail } from "../../service/http.ts";
 import { db } from "../../../firebase.ts";
 import { useGenres } from "../../hooks/useGenres.ts";
 import { HOME } from "../../utils/consts.ts";
+import toast from "react-hot-toast";
 
 function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
       favoriteGenres: [],
     },
     onSubmit: (value) => {
-      console.log("Отправленные данные:", value);
+      console.log("Data:", value);
     },
     validatorAdapter: yupValidator(),
   });
@@ -54,14 +55,28 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
         password,
         bio: bio,
         favoriteGenres: selectedGenres,
+        notificationCount: 0,
+        notifications: [],
+
+        notificationEnabled: true,
       });
 
       handleSetUp(true);
       navigate(HOME);
-      alert("User successfully created!");
+      toast.success("User successfully created! 🎉", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 5000,
+        theme: "colored",
+      });
     } catch (error) {
       console.error("Error during sign up:", error);
-      alert("Error during sign up!");
+      toast.error("Error during sign up! 😞", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 5000,
+        theme: "colored",
+      });
     }
   };
 
@@ -80,6 +95,10 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
             lastName: userDoc.data().lastName || "User",
             email: user.email,
             uid: user.uid,
+            notificationCount: 0,
+            notifications: [],
+
+            notificationEnabled: true,
           },
           { merge: true },
         );
@@ -89,14 +108,27 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
           lastName: "User",
           email: user.email,
           uid: user.uid,
+          notifications: [],
+          notificationCount: 0,
+          notificationEnabled: true,
         });
       }
 
       handleSetUp(true);
-      alert("Google login successful!");
+      toast.success("User successfully created! 🎉", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 50000,
+        theme: "colored",
+      });
     } catch (error) {
       console.error("Error during Google login:", error);
-      alert("Error during Google login!");
+      toast.error("Error during sign up! 😞", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 5000,
+        theme: "colored",
+      });
     }
   };
 

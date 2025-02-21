@@ -14,6 +14,7 @@ import {
 } from "firebase/auth";
 import { auth, db, googleProvider } from "../../firebase.ts";
 import { User } from "../type/type.ts";
+import toast from "react-hot-toast";
 
 export async function getBooks() {
   try {
@@ -110,7 +111,7 @@ export async function updateUserData(
 }
 
 export async function updateUserBookList(user: { user: User }) {
-  const userRef = doc(db, "user", user.uid);
+  const userRef = doc(db, "user", user.user?.uid as string);
   try {
     await updateDoc(userRef, user);
     console.log("User data updated successfully");
@@ -168,7 +169,9 @@ export async function deleteAccount(currentPassword: string) {
       );
       const userRef = doc(db, "user", user?.uid as string);
       await deleteDoc(userRef);
-      alert("Account deleted successfully!");
+
+      toast("Account deleted successfully!");
+
       // @ts-ignore
       await reauthenticateWithCredential(user, credential);
       // @ts-ignore
@@ -177,7 +180,7 @@ export async function deleteAccount(currentPassword: string) {
       return true;
     } catch (error: any) {
       console.error("Error deleting account:", error);
-      alert(`Failed to delete account: ${error.message}`);
+      toast(`Failed to delete account: ${error.message}`, {});
     }
   }
 }

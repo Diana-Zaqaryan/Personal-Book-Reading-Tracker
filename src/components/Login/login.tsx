@@ -7,6 +7,7 @@ import { yupValidator } from "@tanstack/yup-form-adapter";
 import { Link, useNavigate } from "react-router-dom";
 import { loginWithEmail } from "../../service/http.ts";
 import Box from "@mui/material/Box";
+import toast from "react-hot-toast";
 
 interface formModule {
   login: string;
@@ -38,9 +39,21 @@ function Login({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
         handleSetUp(true);
         setIsSuccess(true);
         setErrorMessage(null);
+        toast.success("Login successful! 🎉", {
+          position: "top-center",
+          // @ts-ignore
+          autoClose: 50050,
+          theme: "colored",
+        });
         navigate("/");
       }
     } catch (error: any) {
+      toast.error("Error during login! 😞", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 5000,
+        theme: "colored",
+      });
       setIsSuccess(false);
       setErrorMessage(error.message || "Login failed. Please try again.");
       console.error("Error during login:", error);

@@ -17,7 +17,7 @@ import styles from "./books-list.module.css";
 import { Book } from "../../type/type.ts";
 import Search from "../search/search.tsx";
 import ListItem from "@mui/material/ListItem";
-import { doc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { useNavigate } from "react-router-dom";
@@ -59,15 +59,18 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
     await updateDoc(userRef, {
       bookList: userData?.bookList ? [...userData?.bookList, book] : [book],
     });
-    refetch();
+    const newNotification = `New book added: ${selectBook?.name} at ${new Date().toLocaleTimeString()} 📚`;
+
     if (userData.notificationEnabled) {
       await updateDoc(userRef, {
-        notifications: userData?.notifications
-          ? userData?.notifications + 1
-          : 1,
+        notifications: arrayUnion(newNotification),
+        notificationsCount: userData.notificationsCount + 1,
       });
-      isBookAdded(true, "New book is added !! 😊📚");
     }
+    refetch();
+
+    isBookAdded(true, "Great choice! The book has been added. 📚👍");
+
     navigate(EXPERIMENT);
     handleClose();
   };

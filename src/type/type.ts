@@ -10,8 +10,9 @@ export interface User {
   favoriteGenres?: any;
   theme?: string;
   bookList?: Book[] | [];
-  notifications?: number;
+  notifications?: string[];
   notificationEnabled?: boolean;
+  notificationsCount?: number;
 }
 
 export interface Book {

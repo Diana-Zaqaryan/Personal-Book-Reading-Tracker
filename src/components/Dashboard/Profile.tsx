@@ -21,31 +21,12 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useGenres } from "../../hooks/useGenres.ts";
 import { useNavigate } from "react-router-dom";
 import { SETTINGS } from "../../utils/consts.ts";
+import toast from "react-hot-toast";
 
-// @ts-ignore
-// @ts-ignore
 function Profile({ currentUser }: { currentUser: User }) {
   const [isEditing, setIsEditing] = useState(false);
   const { data: genres, isLoading } = useGenres();
   const navigate = useNavigate();
-
-  // const handlePhoto = () => {
-  //   const imgRef = ref(db, "image");
-  //   uploadBytes(imgRef, currentUser?.photo)
-  //     .then(() => {
-  //       getDownloadURL(imgRef)
-  //         .then((url) => {
-  //           setUrl(url);
-  //         })
-  //         .catch((error) => {
-  //           console.log(error.message, "error getting the image url");
-  //         });
-  //       setImage(null);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error.message);
-  //     });
-  // };
 
   const form = useForm<User>({
     defaultValues: {
@@ -59,7 +40,7 @@ function Profile({ currentUser }: { currentUser: User }) {
       favoriteGenres: currentUser.favoriteGenres || [],
     },
     onSubmit: (value) => {
-      console.log("Отправленные данные:", value);
+      console.log("Data:", value);
     },
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -71,35 +52,9 @@ function Profile({ currentUser }: { currentUser: User }) {
       form.setFieldValue(fieldName, e.target.value);
     };
 
-  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     setImage(file);
-  //     setImageUrl(URL.createObjectURL(file));
-  //   }
-  // };
-
-  // const handleImageUpload = async (uid: string) => {
-  //   if (!image) return;
-  //
-  //   const imageRef = ref(db, `profile_images/${uid}`);
-  //   try {
-  //     await uploadBytes(imageRef, image);
-  //     const imageUrl = await getDownloadURL(imageRef);
-  //     return imageUrl;
-  //   } catch (error) {
-  //     console.error("Error uploading image:", error);
-  //     alert("Error uploading image.");
-  //   }
   // };
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    // let newImageUrl = imageUrl;
-
-    // if (image) {
-    //   newImageUrl = await handleImageUpload(currentUser?.uid);
-    // }
 
     const updatedData = {
       name: form.store.state.values.name,
@@ -113,10 +68,21 @@ function Profile({ currentUser }: { currentUser: User }) {
     try {
       await updateUserData(currentUser?.uid, updatedData);
       setIsEditing(false);
-      alert("User data updated successfully!");
+
+      toast.success("User data updated successfully! 👍", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 50000,
+        theme: "colored",
+      });
     } catch (error) {
       console.error("Error updating data:", error);
-      alert("Error updating data");
+      toast.error("Error updating data! 😞", {
+        position: "top-center",
+        // @ts-ignore
+        autoClose: 5000,
+        theme: "colored",
+      });
     }
   };
 
