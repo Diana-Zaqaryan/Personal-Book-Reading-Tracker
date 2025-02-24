@@ -24,7 +24,11 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import BooksList from "../BooksList/booksList.tsx";
-import { useBook } from "../../hooks/useBook.tsx";
+import { useBooks } from "../../hooks/useBooks.tsx";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../../../firebase.ts";
 
 const ITEM_TYPE = "BOOK";
 
@@ -41,8 +45,9 @@ const BookCard = ({
   }));
 
   const { data: userData, refetch } = useUser();
-
   const { data: statuses } = useStatuses();
+
+  const navigate = useNavigate();
   function BookStatusIcon({ status }: { status: number | undefined }) {
     let IconComponent;
 
@@ -74,42 +79,67 @@ const BookCard = ({
       }
       return book;
     });
+
+    if (currentBook.currentPage === currentBook.totalPage / 2) {
+      toast('📝 "You\'re halfway through your book—keep going!"');
+      const user = auth.currentUser;
+      const userRef = doc(db, "user", user?.uid || "");
+      if (userData?.notificationEnabled) {
+        const newNotification = `📝 You\'re halfway through your book—keep going!`;
+        updateDoc(userRef, {
+          notifications: arrayUnion(newNotification),
+          notificationCount: userData.notificationCount + 1,
+        });
+      }
+    }
     updateUserData(userData.uid, { bookList: updatedBookList });
     refetch();
   };
 
   return (
-    // @ts-ignore
-    <Box key={book.id} ref={drag} margin={"1em auto"}>
+    <Box
+      key={book.id}
+      // @ts-ignore
+      ref={drag}
+      margin={"1em auto"}
+    >
       <Card
         sx={{
           display: "flex",
           borderRadius: 3,
-          width: "22em",
+          width: "95%",
           height: "20em",
           alignItems: "flex-start",
           justifyContent: "space-evenly",
+          flexDirection: "column",
           margin: "0 auto",
+          padding: "0 .5em !important",
         }}
       >
-        <Box>
+        <Box
+          sx={{
+            display: "flex",
+            width: "100%",
+            justifyContent: "space-around",
+            margin: " 0 auto 1.5em auto",
+            cursor: "pointer",
+          }}
+          onClick={() => navigate(`/book/${book.id}`)}
+        >
           <CardMedia
             sx={{ width: "10em", height: "15em" }}
             component="img"
             image={book.image}
             alt={book.name}
           />
-          <Slider
-            defaultValue={book.currentPage}
-            step={1}
-            max={book.totalPage}
-            sx={{ width: "80%", margin: "2em auto" }}
-            valueLabelDisplay="on"
-            marks={[{ value: book.totalPage, label: book.totalPage }]}
-            onChange={(_event: Event, newValue: number | number[]) =>
-              handleReadingPagesChange(book, newValue as number)
-            }
-          />
+          <Box sx={{ margin: "2em auto" }}>
+            <Typography variant="subtitle1" gutterBottom>
+              {book.name}
+            </Typography>
+            <Typography color="textSecondary" gutterBottom variant="subtitle2">
+              {book.author}
+            </Typography>
+          </Box>
         </Box>
 
         <Box
@@ -122,52 +152,58 @@ const BookCard = ({
             width: "100%",
           }}
         >
-          <Box sx={{ margin: "2em auto" }}>
-            <Typography variant="subtitle1" gutterBottom>
-              {book.name}
-            </Typography>
-            <Typography color="textSecondary" gutterBottom variant="subtitle2">
-              {book.author}
-            </Typography>
-          </Box>
-
           <Box
             sx={{
               display: "flex",
               justifyContent: "flex-end",
-              flexDirection: "column",
-              gap: "1.5em",
+              alignItems: "center",
             }}
           >
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <FormControl
-                fullWidth
-                sx={{
-                  padding: 0,
-                  height: "2em",
-                  fontSize: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <BookStatusIcon status={book.status} />
-                  {statuses?.length &&
-                    // @ts-ignore
-                    statuses?.find((s: Status) => s.id == book?.status).value}
-                </Box>
-              </FormControl>
+            <Slider
+              defaultValue={book.currentPage}
+              step={1}
+              max={book.totalPage}
+              sx={{
+                margin: 0,
+                padding: 0,
+                "& .MuiSlider-markLabel": {
+                  top: "10px",
+                  transform: "translateX(-90%)",
+                },
+              }}
+              valueLabelDisplay="on"
+              marks={[{ value: book.totalPage, label: book.totalPage }]}
+              onChange={(_event: Event, newValue: number | number[]) =>
+                handleReadingPagesChange(book, newValue as number)
+              }
+            />
+            <FormControl
+              fullWidth
+              sx={{
+                padding: 0,
+                height: "2em",
+                fontSize: "16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <BookStatusIcon status={book.status} />
+                {statuses?.length &&
+                  // @ts-ignore
+                  statuses?.find((s: Status) => s.id == book?.status).value}
+              </Box>
+            </FormControl>
 
-              <IconButton
-                sx={{ padding: "2px" }}
-                onClick={() => handleDelete(book.id)}
-              >
-                <Tooltip title="Delete">
-                  <DeleteIcon />
-                </Tooltip>
-              </IconButton>
-            </Box>
+            <IconButton
+              sx={{ padding: "2px" }}
+              onClick={() => handleDelete(book.id)}
+            >
+              <Tooltip title="Delete">
+                <DeleteIcon />
+              </Tooltip>
+            </IconButton>
           </Box>
         </Box>
       </Card>
@@ -183,12 +219,29 @@ const DropZone = ({
   removeBook,
 }: DropZoneType) => {
   const theme = useTheme();
+
+  const { data: userData, refetch } = useUser();
+
   // @ts-ignore
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ITEM_TYPE,
     // @ts-ignore
     drop: (item: Book) => {
       moveBook(item.id, status);
+
+      if (status === 3) {
+        toast("🏆 You finished a book! Add your next one!");
+        const user = auth.currentUser;
+        const userRef = doc(db, "user", user?.uid || "");
+        if (userData?.notificationEnabled) {
+          const newNotification = `🏆 You finished a book  at ${new Date().toLocaleTimeString()}! Add your next one!`;
+          updateDoc(userRef, {
+            notifications: arrayUnion(newNotification),
+            notificationCount: userData.notificationCount + 1,
+          });
+        }
+      }
+      refetch();
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
@@ -223,7 +276,7 @@ function Experiment({
   isNewBookAdded: (value: boolean, message: string) => void;
 }) {
   const { data, isLoading, refetch } = useUser();
-  const { data: BookData } = useBook();
+  const { data: BookData } = useBooks();
 
   const bookRef = useRef(data.bookList);
   const [openAddBookDialog, setOpenAddBookDialog] = useState(false);
@@ -302,7 +355,7 @@ function Experiment({
       >
         <BooksList
           isBookAdded={isNewBookAdded}
-          data={BookData}
+          data={BookData as Book[]}
           isAuth={true}
           onAddBook={handleAddBook}
         />

@@ -14,16 +14,16 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import styles from "./books-list.module.css";
-import { Book } from "../../type/type.ts";
+import { Book, BookListType } from "../../type/type.ts";
 import Search from "../search/search.tsx";
 import ListItem from "@mui/material/ListItem";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { useNavigate } from "react-router-dom";
-import { EXPERIMENT } from "../../utils/consts.ts";
+import { TOREADLIST } from "../../utils/consts.ts";
 
-function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
+function BooksList({ data, isAuth, onAddBook, isBookAdded }: BookListType) {
   const [open, setOpen] = useState(false);
   const [selectBook, setSelectBook] = useState<Book>();
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(data as Book[]);
@@ -57,7 +57,7 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
     await updateDoc(userRef, {
       bookList: userData?.bookList ? [...userData?.bookList, book] : [book],
     });
-    const newNotification = `New book added: ${selectBook?.name} at ${new Date().toLocaleTimeString()} 📚`;
+    const newNotification = `📚 New book added: ${selectBook?.name} at ${new Date().toLocaleTimeString()} `;
 
     if (userData?.notificationEnabled) {
       await updateDoc(userRef, {
@@ -66,8 +66,10 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
       });
     }
     refetch();
-    isBookAdded(true, "Great choice! The book has been added. 📚👍");
-    navigate(EXPERIMENT);
+    if (isBookAdded) {
+      isBookAdded(true, "Great choice! The book has been added. 📚👍");
+    }
+    navigate(TOREADLIST);
     handleClose();
   };
 

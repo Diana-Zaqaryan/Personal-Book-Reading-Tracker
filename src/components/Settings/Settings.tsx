@@ -355,6 +355,11 @@ const Settings = ({
             variant="outlined"
             color="error"
             onClick={handleDeleteAccount}
+            sx={{
+              backgroundColor: "transparent",
+              color: "red",
+              "&:hover": { backgroundColor: "#bd2121", color: "#fff" },
+            }}
           >
             Delete Account
           </Button>

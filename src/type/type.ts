@@ -44,3 +44,15 @@ export interface DropZoneType {
   moveBook: (id: string, status: number) => void;
   removeBook: (id: string) => void;
 }
+
+export interface BookListType {
+  data: Book[];
+  isAuth: boolean;
+  onAddBook: ((book: Book) => void) | null;
+  isBookAdded?: (isAdded: boolean, message: string) => void;
+}
+
+export interface Note {
+  book: Book;
+  note: string[];
+}

@@ -1,14 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { getBookById } from "../service/http.ts";
+import { getBooks } from "../service/http.ts";
 import { Book } from "../type/type.ts";
 
-export function useBook(id: string) {
+export function useBooks() {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["book"],
+    queryKey: ["books"],
     queryFn: async () => {
-      return await getBookById(id);
+      return await getBooks();
     },
-    select: (data) => data as Book,
+    staleTime: 6 * 1000000,
+    select: (data) => data as Book[],
   });
 
   return { data, isLoading, error };

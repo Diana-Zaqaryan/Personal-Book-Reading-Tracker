@@ -184,3 +184,38 @@ export async function deleteAccount(currentPassword: string) {
     }
   }
 }
+
+export async function getBookById(bookId: string) {
+  try {
+    const bookRef = doc(db, "book", bookId);
+    const docSnap = await getDoc(bookRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      console.log("No such book!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching book by ID:", error);
+    throw new Error("Failed to fetch the book by ID.");
+  }
+}
+
+export async function getNotes(userId: string) {
+  try {
+    const userRef = doc(db, "user", userId);
+    const userDocSnap = await getDoc(userRef);
+
+    if (userDocSnap.exists()) {
+      const userData = userDocSnap.data();
+      const userNotes = userData.notes || [];
+      return userNotes;
+    } else {
+      console.log("No such user!");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching user notes:", error);
+    throw new Error("Failed to fetch user notes.");
+  }
+}

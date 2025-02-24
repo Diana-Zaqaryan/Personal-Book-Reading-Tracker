@@ -14,6 +14,7 @@ import { onMessage } from "firebase/messaging";
 import {
   BOOKS,
   LOGIN_ROUTE,
+  NOTES,
   PROFILE,
   SETTINGS,
   SIGN_UP,
@@ -25,14 +26,17 @@ import { darkTheme, lightTheme } from "./themes.ts";
 import Settings from "./components/Settings/Settings.tsx";
 import ToReadList from "./components/ToReadList/ToReadList.tsx";
 import Experiment from "./components/experiments/experiment.tsx";
-import { useBook } from "./hooks/useBook.tsx";
+import { useBooks } from "./hooks/useBooks.tsx";
 import toast, { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
+import BookDetails from "./components/BookDetails/BookDetails.tsx";
+import { Book } from "./type/type.ts";
+import Notes from "./components/Notes/Notes.tsx";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
   const { data: userData, refetch } = useUser();
-  const { data, isLoading } = useBook();
+  const { data, isLoading } = useBooks();
 
   const muiTheme = userData?.theme
     ? userData?.theme === "dark"
@@ -108,7 +112,7 @@ function App() {
               element={
                 <BooksList
                   isBookAdded={isNewBookAdded}
-                  data={data}
+                  data={data as Book[]}
                   onAddBook={null}
                   isAuth={isAuth}
                 />
@@ -118,16 +122,18 @@ function App() {
               path={SETTINGS}
               element={<Settings currentUser={userData} refetch={refetch} />}
             />
+            <Route path={NOTES} element={<Notes />} />
             <Route
               path={PROFILE}
               element={<Profile currentUser={userData} />}
             />
-            <Route path={TOREADLIST} element={<ToReadList />} />
-            <Route path="*" element={<Navigate to={BOOKS} />} />
             <Route
-              path="/experiment"
+              path={TOREADLIST}
               element={<Experiment isNewBookAdded={isNewBookAdded} />}
             />
+            <Route path="*" element={<Navigate to={BOOKS} />} />
+
+            <Route path="/book/:id" element={<BookDetails />} />
           </Route>
         )}
       </Routes>

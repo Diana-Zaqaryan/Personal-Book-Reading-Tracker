@@ -27,11 +27,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import BooksList from "../BooksList/booksList.tsx";
-import { useBook } from "../../hooks/useBook.tsx";
+import { useBooks } from "../../hooks/useBooks.tsx";
 
 function ToReadList() {
   const { data: userData, isLoading, refetch } = useUser();
-  const { data } = useBook();
+  const { data } = useBooks();
   const theme = useTheme();
   const [viewMode, setViewMode] = useState("grid");
   const [status, setStatus] = useState(1);
@@ -143,10 +143,9 @@ function ToReadList() {
         maxWidth="md"
       >
         <BooksList
-          data={data}
+          data={data as Book[]}
           isAuth={true}
           onAddBook={handleAddBook}
-          isBookAdded={true}
         />
       </Dialog>
       <Box

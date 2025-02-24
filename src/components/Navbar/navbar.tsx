@@ -15,6 +15,9 @@ import icon2 from "../../assets/icon2.png";
 import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase.ts";
 import { User } from "../../type/type.ts";
+import avatar from "../../assets/avatar.png";
+import bookicon2 from "../../assets/bookicon2.png";
+import { useTheme } from "../Contexts/ThemeContext.tsx";
 
 export default function ButtonAppBar({
   isAuth,
@@ -35,6 +38,7 @@ export default function ButtonAppBar({
   const [anchorElNotifications, setAnchorElNotifications] =
     useState<null | HTMLElement>(null);
   const notificationsOpen = Boolean(anchorElNotifications);
+  const { theme } = useTheme();
 
   const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNotifications(event.currentTarget);
@@ -101,7 +105,7 @@ export default function ButtonAppBar({
           >
             <img
               className={styles.icon}
-              src={icon2}
+              src={theme === "light" ? bookicon2 : icon2}
               alt="icon"
               onClick={() => {
                 isAuth && navigate(BOOKS);
@@ -140,7 +144,7 @@ export default function ButtonAppBar({
                     }}
                   >
                     {notifications && notifications.length ? (
-                      notifications.map((not, index) => (
+                      [...notifications].reverse().map((not, index) => (
                         <MenuItem key={index}>
                           <Typography>{not}</Typography>
                         </MenuItem>
@@ -157,8 +161,10 @@ export default function ButtonAppBar({
                   <Box sx={{ display: "flex" }}>
                     <Avatar
                       alt="Remy Sharp"
-                      src="/static/images/avatar/1.jpg"
+                      src={avatar}
                       onClick={handleClick}
+                      sx={{ boxShadow: "0.2px 2px 5px 1px #063651" }}
+                      aria-expanded={open ? "true" : undefined}
                       aria-controls={open ? "basic-menu" : undefined}
                     />
                     <Menu

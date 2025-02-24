@@ -12,3 +12,5 @@ export const SETTINGS = "/Settings";
 export const TOREADLIST = "/ReadList";
 
 export const EXPERIMENT = "/Experiment";
+
+export const NOTES = "/Notes";

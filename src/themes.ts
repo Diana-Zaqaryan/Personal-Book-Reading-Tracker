@@ -5,33 +5,38 @@ export const lightTheme = createTheme({
   palette: {
     mode: "light",
     background: {
-      default: "#F5F5F5",
-      paper: "#FFFFFF",
+      default: "#f5f7fb",
+      paper: "#ffffff",
     },
     primary: {
-      main: "#1c9ee4",
+      main: "rgb(31,172,220)",
     },
     secondary: {
-      main: "#00A896",
+      main: "#2196f3",
     },
     text: {
-      primary: "#1090d8",
-      secondary: "#555555",
+      primary: "rgba(8,73,108,0.73)",
+      secondary: "#757575",
     },
-    divider: "#DDDDDD",
+    divider: "#E0E0E0",
     action: {
-      active: "#1c9ee4",
-      hover: "rgba(28,158,228,0.53)",
+      active: "rgba(39,134,175,0.86)",
+      hover: "rgba(156, 39, 176, 0.1)",
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "10px",
+          borderRadius: "12px",
           textTransform: "none",
-          padding: "8px 16px",
-          boxShadow: "0.2px 2px 5px 1px #063651",
+          padding: "10px 20px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "rgba(26,132,179,0.94)",
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "rgba(31,97,162,0.87)",
+          },
         },
       },
     },
@@ -39,16 +44,21 @@ export const lightTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: "10px",
-          textTransform: "none",
-          padding: "5px",
+          padding: "10px 12px",
+          backgroundColor: "#fff",
+          border: "1px solid #E0E0E0",
+          "&:focus": {
+            borderColor: "rgba(39,119,176,0.81)",
+          },
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "16px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          borderRadius: "12px", // Rounded corners for cards
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.08)", // Subtle shadow for cards
+          backgroundColor: "#ffffff", // Clean white background for card content
         },
       },
     },
@@ -56,15 +66,19 @@ export const lightTheme = createTheme({
       styleOverrides: {
         h1: {
           fontWeight: 600,
+          color: "#063149", // Dark text for headings (ensures legibility)
         },
         h2: {
           fontWeight: 500,
+          color: "rgba(13,110,166,0.78)", // Slightly lighter but still dark text for h2
         },
         h3: {
           fontWeight: 400,
+          color: "#701313", // Neutral dark color for h3
         },
         body1: {
           fontSize: "1rem",
+          color: "#032c43", // Standard dark text for body
         },
       },
     },
