@@ -42,8 +42,8 @@ export default function ButtonAppBar({
   const handleNotificationsClose = async () => {
     setAnchorElNotifications(null);
     const userRef = doc(db, "user", auth.currentUser?.uid || "");
-    await updateDoc(userRef, { notificationsCount: 0 });
-    userData.notificationsCount = 0;
+    await updateDoc(userRef, { notificationCount: 0 });
+    userData.notificationCount = 0;
     refetch();
   };
   refetch();
@@ -115,9 +115,9 @@ export default function ButtonAppBar({
                 <Box>
                   <Badge
                     badgeContent={
-                      userData?.notificationsCount &&
-                      userData?.notificationsCount > 0
-                        ? userData?.notificationsCount
+                      userData?.notificationCount &&
+                      userData?.notificationCount > 0
+                        ? userData?.notificationCount
                         : null
                     }
                     onClick={handleNotificationsClick}

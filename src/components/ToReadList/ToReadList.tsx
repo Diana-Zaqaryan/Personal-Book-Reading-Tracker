@@ -142,7 +142,12 @@ function ToReadList() {
         fullWidth
         maxWidth="md"
       >
-        <BooksList data={data} isAuth={true} onAddBook={handleAddBook} />
+        <BooksList
+          data={data}
+          isAuth={true}
+          onAddBook={handleAddBook}
+          isBookAdded={true}
+        />
       </Dialog>
       <Box
         sx={{

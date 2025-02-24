@@ -62,7 +62,7 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
     if (userData?.notificationEnabled) {
       await updateDoc(userRef, {
         notifications: arrayUnion(newNotification),
-        notificationsCount: userData.notificationsCount + 1,
+        notificationCount: userData.notificationCount + 1,
       });
     }
     refetch();

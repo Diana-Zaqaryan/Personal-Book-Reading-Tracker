@@ -12,7 +12,7 @@ export interface User {
   bookList?: Book[] | [];
   notifications?: string[];
   notificationEnabled?: boolean;
-  notificationsCount?: number;
+  notificationCount?: number;
 }
 
 export interface Book {
