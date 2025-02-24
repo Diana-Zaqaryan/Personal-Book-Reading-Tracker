@@ -23,16 +23,14 @@ import { useUser } from "../../hooks/useUser.ts";
 import { useNavigate } from "react-router-dom";
 import { EXPERIMENT } from "../../utils/consts.ts";
 
-// @ts-ignore
 function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
-  // const { data, isLoading } = useBook();
   const [open, setOpen] = useState(false);
   const [selectBook, setSelectBook] = useState<Book>();
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(data as Book[]);
   const theme = useTheme();
   const { data: userData, refetch } = useUser();
-
   const navigate = useNavigate();
+
   const handleOpen = (book: Book) => {
     setOpen(true);
     setSelectBook(book);
@@ -61,116 +59,47 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
     });
     const newNotification = `New book added: ${selectBook?.name} at ${new Date().toLocaleTimeString()} 📚`;
 
-    if (userData.notificationEnabled) {
+    if (userData?.notificationEnabled) {
       await updateDoc(userRef, {
         notifications: arrayUnion(newNotification),
         notificationsCount: userData.notificationsCount + 1,
       });
     }
     refetch();
-
     isBookAdded(true, "Great choice! The book has been added. 📚👍");
-
     navigate(EXPERIMENT);
     handleClose();
   };
-  const Open = () => {
-    return (
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        sx={{
-          "& .MuiPaper-root": {
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-          },
-        }}
-      >
-        <DialogTitle id="alert-dialog-title" sx={{ textAlign: "center" }}>
-          {selectBook?.name}
-        </DialogTitle>
-        <DialogContent sx={{ display: "flex" }}>
-          <div
-            className="left_side"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-            }}
-          >
-            <img src={selectBook?.image} style={{ width: "100%" }} />
-
-            {isAuth && (
-              <Button
-                disabled={
-                  userData?.bookList &&
-                  userData.bookList.some(
-                    (book: Book) => book.id === selectBook?.id,
-                  )
-                }
-                type="submit"
-                variant="contained"
-                fullWidth
-                style={{ margin: "20px auto" }}
-                color="primary"
-                onClick={() => addBook(selectBook as Book)}
-              >
-                Add
-              </Button>
-            )}
-
-            <Rating
-              name="read-only"
-              readOnly
-              precision={0.2}
-              value={selectBook?.rating}
-            />
-            <div>{selectBook?.rating}</div>
-          </div>
-
-          <DialogContentText
-            id="alert-dialog-description"
-            sx={{ fontSize: "14px", paddingLeft: "20px" }}
-          >
-            {selectBook?.desc}
-          </DialogContentText>
-        </DialogContent>
-      </Dialog>
-    );
-  };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: theme.palette.background.default,
-        color: theme.palette.text.primary,
-        padding: 0,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Search handleInput={handleSearch} />
-
-      <Typography variant="h2" gutterBottom sx={{ margin: "0 auto" }}>
-        Books List
-      </Typography>
-      <List
-        color="primary"
-        className={styles.list}
+    <>
+      <Box
         sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-around",
-          gap: "30px",
           backgroundColor: theme.palette.background.default,
           color: theme.palette.text.primary,
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        {filteredBooks &&
-          filteredBooks.map((book: Book) => (
+        <Search handleInput={handleSearch} />
+        <Typography variant="h2" gutterBottom sx={{ margin: "0 auto" }}>
+          Books List
+        </Typography>
+        <List
+          color="primary"
+          className={styles.list}
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-around",
+            gap: "30px",
+            backgroundColor: theme.palette.background.default,
+            color: theme.palette.text.primary,
+          }}
+        >
+          {filteredBooks.map((book: Book) => (
             <ListItem
               key={book.id}
               style={{ display: "inline-block", width: "auto" }}
@@ -206,9 +135,72 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }) {
               </Card>
             </ListItem>
           ))}
-        <Open />
-      </List>
-    </Box>
+        </List>
+      </Box>
+
+      {selectBook && (
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          sx={{
+            "& .MuiPaper-root": {
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+            },
+          }}
+        >
+          <DialogTitle id="alert-dialog-title" sx={{ textAlign: "center" }}>
+            {selectBook?.name}
+          </DialogTitle>
+          <DialogContent sx={{ display: "flex" }}>
+            <div
+              className="left_side"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+              }}
+            >
+              <img src={selectBook?.image} style={{ width: "100%" }} />
+              {isAuth && (
+                <Button
+                  disabled={
+                    userData?.bookList &&
+                    userData.bookList.some(
+                      (book: Book) => book.id === selectBook?.id,
+                    )
+                  }
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  style={{ margin: "20px auto" }}
+                  color="primary"
+                  onClick={() => addBook(selectBook)}
+                >
+                  Add
+                </Button>
+              )}
+              <Rating
+                name="read-only"
+                readOnly
+                precision={0.2}
+                value={selectBook?.rating}
+              />
+              <div>{selectBook?.rating}</div>
+            </div>
+
+            <DialogContentText
+              id="alert-dialog-description"
+              sx={{ fontSize: "14px", paddingLeft: "20px" }}
+            >
+              {selectBook?.desc}
+            </DialogContentText>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
 
