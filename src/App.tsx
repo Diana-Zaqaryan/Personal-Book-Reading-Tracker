@@ -31,7 +31,7 @@ import { ToastContainer } from "react-toastify";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
-  const { data: userData, isLoading: userIsLoading, refetch } = useUser();
+  const { data: userData, refetch } = useUser();
   const { data, isLoading } = useBook();
 
   const muiTheme = userData?.theme
@@ -59,7 +59,7 @@ function App() {
     return () => unsubscribe();
   }, [refetch]);
 
-  if (userIsLoading || isLoading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
