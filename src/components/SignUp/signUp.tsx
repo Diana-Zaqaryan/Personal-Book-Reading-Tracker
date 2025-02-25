@@ -1,5 +1,17 @@
-import { FormEvent, useState } from "react";
-import { TextField, Button, Divider, Autocomplete, Chip } from "@mui/material";
+import React, { FormEvent, useState } from "react";
+import {
+  TextField,
+  Button,
+  Divider,
+  Autocomplete,
+  Chip,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  FormHelperText,
+} from "@mui/material";
 import * as yup from "yup";
 import { useForm } from "@tanstack/react-form";
 import { yupValidator } from "@tanstack/yup-form-adapter";
@@ -14,6 +26,7 @@ import { db } from "../../../firebase.ts";
 import { useGenres } from "../../hooks/useGenres.ts";
 import { HOME } from "../../utils/consts.ts";
 import toast from "react-hot-toast";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
   const navigate = useNavigate();
@@ -21,6 +34,8 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
   const [selectedGenres, setSelectedGenres] = useState<
     { id: string; name: string }[]
   >([]);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -38,6 +53,13 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
     },
     validatorAdapter: yupValidator(),
   });
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+  };
 
   const signUp = async () => {
     const { email, password, firstName, lastName, bio, readingGoals } =
@@ -273,22 +295,36 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
               }}
               children={(field) => {
                 return (
-                  <TextField
-                    id="password-input"
-                    label="Password"
-                    fullWidth
-                    sx={{ margin: "0.5em auto" }}
-                    variant="outlined"
-                    type="password"
-                    helperText={field.state.meta.errors.join(", ")}
-                    autoComplete="current-password"
-                    value={field.state.value}
-                    onChange={(e) => {
-                      field.handleChange(e.target.value);
-                    }}
-                    onBlur={field.handleBlur}
-                    error={!!field.state.meta.errors.length}
-                  />
+                  <FormControl sx={{ width: "100%" }}>
+                    <InputLabel htmlFor="password">Password</InputLabel>
+                    <OutlinedInput
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!!field.state.meta.errors.length}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="New Password"
+                    />
+                    {field.state.meta.isTouched &&
+                      field.state.meta.errors.length > 0 && (
+                        <FormHelperText sx={{ color: "#c31414" }}>
+                          {field.state.meta.errors[0]}
+                        </FormHelperText>
+                      )}
+                  </FormControl>
                 );
               }}
             />
@@ -321,6 +357,9 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
             />
             <form.Field
               name="readingGoals"
+              validators={{
+                onChange: yup.number().positive(),
+              }}
               children={(field) => {
                 return (
                   <TextField

@@ -8,8 +8,8 @@ import {
   Autocomplete,
   Chip,
   IconButton,
+  CardMedia,
 } from "@mui/material";
-import profile from "../../assets/profile.png";
 import { ChangeEvent, FormEvent, useState } from "react";
 import styles from "./profile.module.css";
 import * as yup from "yup";
@@ -22,6 +22,7 @@ import { useGenres } from "../../hooks/useGenres.ts";
 import { useNavigate } from "react-router-dom";
 import { SETTINGS } from "../../utils/consts.ts";
 import toast from "react-hot-toast";
+import avatar from "../../assets/avatar.png";
 
 function Profile({ currentUser }: { currentUser: User }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -101,11 +102,13 @@ function Profile({ currentUser }: { currentUser: User }) {
       ></Box>
 
       <Card sx={{ marginTop: 50, margin: "auto" }}>
-        {currentUser?.photo ? (
-          <img src={profile} className={styles.avatar} />
-        ) : (
-          <img src={profile} className={styles.avatar} />
-        )}
+        <CardMedia
+          className={styles.avatar}
+          component="img"
+          image={avatar}
+          alt={"avatar photo"}
+          sx={{ borderRadius: "20%", width: "150px" }}
+        />
         <Typography variant="h2" gutterBottom>
           {isEditing ? "Edit Your Profile" : " Profile"}
         </Typography>
@@ -122,7 +125,7 @@ function Profile({ currentUser }: { currentUser: User }) {
           onSubmit={async (e: FormEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            await form.handleSubmit();
+            form.handleSubmit();
           }}
         >
           <form.Field
@@ -242,19 +245,8 @@ function Profile({ currentUser }: { currentUser: User }) {
           <form.Field
             name="readingGoals"
             validators={{
-              onChange: (value) => {
-                try {
-                  yup
-                    .number()
-                    .integer("enter correct value")
-                    .validateSync(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof Error) {
-                    return error.message;
-                  }
-                }
-              },
+              // @ts-ignore
+              onChange: yup.number().positive(),
             }}
             children={(field) => {
               return (
@@ -268,7 +260,9 @@ function Profile({ currentUser }: { currentUser: User }) {
                   style={{ margin: "25px auto" }}
                   autoComplete="current-readingGoals"
                   value={field.state.value}
-                  onChange={handleFieldChange("readingGoals")}
+                  onChange={(e) => {
+                    field.handleChange(+e.target.value);
+                  }}
                   onBlur={field.handleBlur}
                   error={!!field.state.meta.errors.length}
                   helperText={field.state.meta.errors.join(", ")}
@@ -314,24 +308,28 @@ function Profile({ currentUser }: { currentUser: User }) {
 
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={() => <></>}
+            children={([canSubmit]) => (
+              <>
+                {!isEditing ? (
+                  <Button variant="outlined" onClick={() => setIsEditing(true)}>
+                    Edit Profile
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    disabled={!canSubmit}
+                    onClick={(e) => {
+                      setIsEditing(false);
+                      handleSubmit(e);
+                    }}
+                  >
+                    Save
+                  </Button>
+                )}
+              </>
+            )}
           />
-          {!isEditing ? (
-            <Button variant="outlined" onClick={() => setIsEditing(true)}>
-              Edit Profile
-            </Button>
-          ) : (
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={(e) => {
-                setIsEditing(false);
-                handleSubmit(e);
-              }}
-            >
-              Save
-            </Button>
-          )}
         </form>
       </Card>
     </>

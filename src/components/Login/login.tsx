@@ -1,5 +1,14 @@
-import { FormEvent, useState } from "react";
-import { TextField, Button, Alert } from "@mui/material";
+import React, { FormEvent, useState } from "react";
+import {
+  TextField,
+  Button,
+  Alert,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import * as yup from "yup";
 import { useForm } from "@tanstack/react-form";
 import { yupValidator } from "@tanstack/yup-form-adapter";
@@ -8,6 +17,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginWithEmail } from "../../service/http.ts";
 import Box from "@mui/material/Box";
 import toast from "react-hot-toast";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface formModule {
   login: string;
@@ -18,6 +28,7 @@ function Login({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<formModule>({
     defaultValues: {
@@ -30,6 +41,13 @@ function Login({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
     // @ts-ignore
     validatorAdapter: yupValidator(),
   });
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+  };
 
   const login = async () => {
     const { login, password } = form.store.state.values;
@@ -138,20 +156,30 @@ function Login({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
               }}
               children={(field) => {
                 return (
-                  <TextField
-                    id="password-input"
-                    label="Password"
-                    fullWidth
-                    variant="outlined"
-                    type="password"
-                    style={{ margin: "10px auto" }}
-                    autoComplete="current-password"
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
-                    error={!!field.state.meta.errors.length}
-                    helperText={field.state.meta.errors.join(", ")}
-                  />
+                  <FormControl sx={{ width: "100%" }}>
+                    <InputLabel htmlFor="password">Password</InputLabel>
+                    <OutlinedInput
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!!field.state.meta.errors.length}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="New Password"
+                    />
+                  </FormControl>
                 );
               }}
             />
