@@ -40,7 +40,6 @@ const Analytics = () => {
         const formattedDate = sessionDate.toISOString().split("T")[0];
         const formattedDateTime = sessionDate.toISOString().split("T");
         const time = formattedDateTime[1].split(".")[0];
-        console.log(time);
 
         return {
           sessionDate: `${formattedDate} - ${time}`,

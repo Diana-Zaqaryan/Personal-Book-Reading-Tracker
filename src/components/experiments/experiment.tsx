@@ -41,6 +41,7 @@ const BookCard = ({
 }) => {
   const [, drag] = useDrag(() => ({
     type: ITEM_TYPE,
+    canDrag: book?.status !== 3,
     item: { id: book.id },
   }));
 
