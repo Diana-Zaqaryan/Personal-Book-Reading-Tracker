@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { useTheme } from "@mui/material";
 import ScienceIcon from "@mui/icons-material/Science";
+import BarChartIcon from "@mui/icons-material/BarChart";
 
 const iconMap = {
   Books: <MenuBookIcon />,
@@ -17,6 +18,7 @@ const iconMap = {
   Notes: <EditNoteIcon />,
   Settings: <SettingsIcon />,
   Experiment: <ScienceIcon />,
+  Analytics: <BarChartIcon />,
 };
 
 function CustomDrawer() {
@@ -31,42 +33,45 @@ function CustomDrawer() {
   return (
     <div>
       <List sx={{ marginTop: "50px" }}>
-        {["ReadList", "Books", "Notes", "Settings"].map((text: string) => {
-          const isActive =
-            location.pathname === `/${text.split(" ").join("").toLowerCase()}`;
+        {["ReadList", "Books", "Notes", "Analytics", "Settings"].map(
+          (text: string) => {
+            const isActive =
+              location.pathname ===
+              `/${text.split(" ").join("").toLowerCase()}`;
 
-          return (
-            <ListItem key={text} disablePadding>
-              <ListItemButton
-                onClick={() =>
-                  handleNavigate(`/${text.split(" ").join("").toLowerCase()}`)
-                }
-                sx={{
-                  backgroundColor: isActive
-                    ? theme.palette.primary.main
-                    : "transparent",
-                  color: isActive ? theme.palette.common.white : "inherit",
-                  "&:hover": {
-                    backgroundColor: isActive
-                      ? theme.palette.primary.dark
-                      : theme.palette.action.hover,
-                  },
-                  borderRadius: "8px",
-                  transition: "background-color 0.3s ease",
-                }}
-              >
-                <ListItemIcon
+            return (
+              <ListItem key={text} disablePadding>
+                <ListItemButton
+                  onClick={() =>
+                    handleNavigate(`/${text.split(" ").join("").toLowerCase()}`)
+                  }
                   sx={{
+                    backgroundColor: isActive
+                      ? theme.palette.primary.main
+                      : "transparent",
                     color: isActive ? theme.palette.common.white : "inherit",
+                    "&:hover": {
+                      backgroundColor: isActive
+                        ? theme.palette.primary.dark
+                        : theme.palette.action.hover,
+                    },
+                    borderRadius: "8px",
+                    transition: "background-color 0.3s ease",
                   }}
                 >
-                  {iconMap[text]}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
+                  <ListItemIcon
+                    sx={{
+                      color: isActive ? theme.palette.common.white : "inherit",
+                    }}
+                  >
+                    {iconMap[text]}
+                  </ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            );
+          },
+        )}
       </List>
     </div>
   );

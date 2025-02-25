@@ -7,14 +7,18 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
+  InputLabel,
   List,
+  MenuItem,
   Rating,
+  Select,
   Typography,
   useTheme,
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import styles from "./books-list.module.css";
-import { Book, BookListType } from "../../type/type.ts";
+import { Book, BookListType, Genre } from "../../type/type.ts";
 import Search from "../search/search.tsx";
 import ListItem from "@mui/material/ListItem";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
@@ -22,11 +26,14 @@ import { auth, db } from "../../../firebase.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { useNavigate } from "react-router-dom";
 import { TOREADLIST } from "../../utils/consts.ts";
+import { useGenres } from "../../hooks/useGenres.ts";
 
 function BooksList({ data, isAuth, onAddBook, isBookAdded }: BookListType) {
   const [open, setOpen] = useState(false);
   const [selectBook, setSelectBook] = useState<Book>();
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(data as Book[]);
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const { data: genres } = useGenres();
   const theme = useTheme();
   const { data: userData, refetch } = useUser();
   const navigate = useNavigate();
@@ -42,6 +49,15 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }: BookListType) {
       (data.filter((book: Book) =>
         (book as Book).name.toLowerCase().includes(value.toLowerCase()),
       ) as Book[]);
+
+    setFilteredBooks(filtered?.length ? filtered : []);
+  };
+
+  const handleFilter = (value: string) => {
+    setSelectedGenre(value);
+    const filtered: undefined | Book[] =
+      data &&
+      (data.filter((book: Book) => (book as Book).genreId === value) as Book[]);
 
     setFilteredBooks(filtered?.length ? filtered : []);
   };
@@ -85,6 +101,32 @@ function BooksList({ data, isAuth, onAddBook, isBookAdded }: BookListType) {
         }}
       >
         <Search handleInput={handleSearch} />
+        <FormControl
+          sx={{
+            minWidth: 200,
+            marginBottom: 2,
+            width: "20%",
+            alignSelf: "flex-end",
+            marginRight: "1.5em",
+            marginTop: "1em",
+          }}
+        >
+          <InputLabel>Genre</InputLabel>
+          <Select
+            value={selectedGenre}
+            label="Genre"
+            onChange={(e) => {
+              handleFilter(e.target.value);
+            }}
+          >
+            <MenuItem value="">All Genres</MenuItem>
+            {genres?.map((genre: Genre) => (
+              <MenuItem key={genre.id} value={genre.id}>
+                {genre.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <Typography variant="h2" gutterBottom sx={{ margin: "0 auto" }}>
           Books List
         </Typography>

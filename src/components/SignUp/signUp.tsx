@@ -346,6 +346,7 @@ function SignUp({ handleSetUp }: { handleSetUp: (value: boolean) => void }) {
 
             <form.Field
               name="favoriteGenres"
+              validators={{}}
               children={(_field) => {
                 return (
                   <>

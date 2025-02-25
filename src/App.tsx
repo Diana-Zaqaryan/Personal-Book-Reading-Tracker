@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import ButtonAppBar from "./components/Navbar/navbar.tsx";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Login from "./components/Login/login.tsx";
 import SignUp from "./components/SignUp/signUp.tsx";
 import BooksList from "./components/BooksList/booksList.tsx";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, generateToken, messaging } from "../firebase.ts";
+import { auth, db, generateToken, messaging } from "../firebase.ts";
 import { useUser } from "./hooks/useUser.ts";
 import NonAuthLayout from "./components/NonAuthLayout/nonAuthLayout.tsx";
 import Main from "./components/main/main.tsx";
@@ -24,7 +24,6 @@ import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import Profile from "./components/Dashboard/Profile.tsx";
 import { darkTheme, lightTheme } from "./themes.ts";
 import Settings from "./components/Settings/Settings.tsx";
-import ToReadList from "./components/ToReadList/ToReadList.tsx";
 import Experiment from "./components/experiments/experiment.tsx";
 import { useBooks } from "./hooks/useBooks.tsx";
 import toast, { Toaster } from "react-hot-toast";
@@ -32,11 +31,15 @@ import { ToastContainer } from "react-toastify";
 import BookDetails from "./components/BookDetails/BookDetails.tsx";
 import { Book } from "./type/type.ts";
 import Notes from "./components/Notes/Notes.tsx";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+import Analytics from "./components/Analytics/Analytics.tsx";
+import { updateUserData } from "./service/http.ts";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
   const { data: userData, refetch } = useUser();
   const { data, isLoading } = useBooks();
+  const navigate = useNavigate();
 
   const muiTheme = userData?.theme
     ? userData?.theme === "dark"
@@ -52,11 +55,22 @@ function App() {
         onMessage(messaging, (payload) => {
           console.log(payload);
           toast(payload.notification?.body as string);
+
+          const userRef = doc(db, "users", user.uid);
+
+          if (userData?.notificationEnabled) {
+            updateDoc(userRef, {
+              notifications: arrayUnion(payload.notification?.body),
+              notificationCount: userData.notificationCount + 1,
+            });
+            refetch();
+          }
         });
 
         refetch();
       } else {
         setIsAuth(false);
+        navigate(LOGIN_ROUTE);
       }
     });
 
@@ -66,6 +80,32 @@ function App() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const handleAddBook = (book: Book) => {
+    const updatedBookList =
+      userData && userData?.bookList
+        ? [
+            ...userData.bookList,
+            {
+              ...book,
+              status: 1,
+              currentPage: 0,
+              timeSpent: 0,
+              addDate: Date.now(),
+            },
+          ]
+        : [
+            {
+              ...book,
+              status: 1,
+              currentPage: 0,
+              timeSpent: 0,
+              addDate: Date.now(),
+            },
+          ];
+    updateUserData(userData.uid, { bookList: updatedBookList });
+    refetch();
+  };
 
   function isNewBookAdded(isAdded: boolean, message: string) {
     if (isAdded) {
@@ -113,7 +153,7 @@ function App() {
                 <BooksList
                   isBookAdded={isNewBookAdded}
                   data={data as Book[]}
-                  onAddBook={null}
+                  onAddBook={handleAddBook}
                   isAuth={isAuth}
                 />
               }
@@ -131,6 +171,8 @@ function App() {
               path={TOREADLIST}
               element={<Experiment isNewBookAdded={isNewBookAdded} />}
             />
+
+            <Route path={"/analytics"} element={<Analytics />} />
             <Route path="*" element={<Navigate to={BOOKS} />} />
 
             <Route path="/book/:id" element={<BookDetails />} />

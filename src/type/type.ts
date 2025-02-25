@@ -25,6 +25,13 @@ export interface Book {
   author: string;
   currentPage: number;
   status?: number;
+  finishedDate?: number;
+  timeSpent?: string;
+  progress?: number;
+  addDate?: number;
+  genreId?: string;
+  pagesReadHistory?: any;
+  totalPagesRead?: number;
 }
 
 export interface Genre {

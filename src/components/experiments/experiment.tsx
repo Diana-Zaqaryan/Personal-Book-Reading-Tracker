@@ -47,6 +47,8 @@ const BookCard = ({
   const { data: userData, refetch } = useUser();
   const { data: statuses } = useStatuses();
 
+  const bookRef = useRef(userData.bookList);
+
   const navigate = useNavigate();
   function BookStatusIcon({ status }: { status: number | undefined }) {
     let IconComponent;
@@ -80,6 +82,12 @@ const BookCard = ({
       return book;
     });
 
+    const pagesReadInSession = currentBook.pagesReadHistory || [];
+    pagesReadInSession.push({
+      sessionDate: Date.now(),
+      pagesRead: page,
+    });
+    currentBook.pagesReadHistory = pagesReadInSession;
     if (currentBook.currentPage === currentBook.totalPage / 2) {
       toast('📝 "You\'re halfway through your book—keep going!"');
       const user = auth.currentUser;
@@ -92,7 +100,9 @@ const BookCard = ({
         });
       }
     }
+    refetch();
     updateUserData(userData.uid, { bookList: updatedBookList });
+    bookRef.current = updatedBookList;
     refetch();
   };
 
@@ -293,14 +303,30 @@ function Experiment({
   const moveBook = (bookId: string, newStatus: number) => {
     const updatedBookList = bookRef.current.map((book: Book) => {
       if (book.id === bookId) {
-        return { ...book, status: newStatus };
+        const updatedBook = { ...book, status: newStatus };
+        updatedBook.currentPage = book.currentPage;
+        if (newStatus === 3 && !book.finishedDate) {
+          updatedBook.finishedDate = Date.now();
+
+          const timeSpentInMillis =
+            updatedBook?.finishedDate - (updatedBook?.addDate as number);
+
+          const hours = Math.floor(timeSpentInMillis / (1000 * 60 * 60));
+          const minutes = Math.floor(
+            (timeSpentInMillis % (1000 * 60 * 60)) / (1000 * 60),
+          );
+          const seconds = Math.floor((timeSpentInMillis % (1000 * 60)) / 1000);
+
+          updatedBook.timeSpent = `${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        return updatedBook;
       }
       return book;
     });
 
     updateUserData(data.uid, { bookList: updatedBookList });
     bookRef.current = updatedBookList;
-    refetch();
   };
 
   if (isLoading) {
@@ -315,7 +341,26 @@ function Experiment({
   };
 
   const handleAddBook = (book: Book) => {
-    const updatedBookList = data.bookList ? [...data.bookList, book] : [book];
+    const updatedBookList = data.bookList
+      ? [
+          ...data.bookList,
+          {
+            ...book,
+            status: 1,
+            currentPage: 0,
+            timeSpent: 0,
+            addDate: Date.now(),
+          },
+        ]
+      : [
+          {
+            ...book,
+            status: 1,
+            currentPage: 0,
+            timeSpent: 0,
+            addDate: Date.now(),
+          },
+        ];
     updateUserData(data.uid, { bookList: updatedBookList });
     bookRef.current = updatedBookList;
     refetch();

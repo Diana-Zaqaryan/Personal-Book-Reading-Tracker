@@ -80,6 +80,7 @@ export default function ButtonAppBar({
         "& .MuiPaper-root": {
           position: "relative",
           zIndex: 1000,
+          height: "5.5em",
         },
       }}
     >

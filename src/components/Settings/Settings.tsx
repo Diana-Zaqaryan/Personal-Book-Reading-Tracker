@@ -24,7 +24,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { User } from "../../type/type.ts";
 import { deleteAccount } from "../../service/http.ts";
 import { useNavigate } from "react-router-dom";
-import { BOOKS } from "../../utils/consts.ts";
+import { LOGIN_ROUTE } from "../../utils/consts.ts";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm } from "@tanstack/react-form";
 import { yupValidator } from "@tanstack/yup-form-adapter";
@@ -119,7 +119,7 @@ const Settings = ({
       form.getFieldValue("newPassword"),
     );
     if (isDeleteSuccessful) {
-      navigate(BOOKS);
+      navigate(LOGIN_ROUTE);
     }
   };
 
